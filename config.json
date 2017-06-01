@@ -1,0 +1,9 @@
+{
+    "listenPort": 3000,
+    "serverTimeout": 60,
+    "serverExclusionTime": 120,
+    "serverList": [
+        "localhost:3100",
+        "localhost:3200"        
+    ]
+}
