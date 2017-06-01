@@ -2,9 +2,9 @@
 TP Cuatrimestral de la materia Implementación de Arquitecturas Concurrentes
 
 ## Miembros
-* Tomás
-* Juan Pablo
-* Marcos Palluchi
+* Tomás Milar
+* Juan Pablo de Blass
+* Marcos Paulucci
 * Claudio Yuri
 
 ## Consigna

@@ -16,7 +16,7 @@
     "nodejs",
     "concurrency"
   ],
-  "author": "Claudio Yuri, Marcos Paulucci, Tomás Milar, Juan Pablo",
+  "author": "Claudio Yuri, Marcos Paulucci, Tomás Milar, Juan Pablo de Blas",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/claudio-yuri/iasc-load-balancer/issues"
