@@ -42,15 +42,35 @@ if(config.serverList.length == 0){
 //************************************************************************ 
 
 const express = require('express');
+const Client = require('node-rest-client').Client;
 var app = express();
 
 //request de prueba
 app.get("/", (req, res) => {
-    console.log("Recibí un request de " + req.ip);
-    res.send("Hola, son las " + (new Date().toString()));
+    console.log(`Recibí un request de ${req.ip}}`);
+     
+    var client = new Client();
+    
+    //llamo a algún servidor externo
+    //TODO: Falta acá llamar al planificador para tomar algún servidor de los seteados en el config
+    client.get("http://localhost:3002", (data, response) => {
+        //parseo la respuesta
+        if(Buffer.isBuffer(data)){
+            data = data.toString('utf8');
+        }
+        //respondo al cliente
+        res.send(data);
+    });
+
+    // TODO: node-rest-client ya lanza eventos en caso de timeout
+    //       acá podemos aprovechar para marcar como no disponible al servidor que no responda
+    // req.on('requestTimeout', function (req) {
+    //     console.log('request has expired');
+    //     req.abort();
+    // });
 });
 
 //levanto el servidor
 app.listen(config.listenPort, () => {
-  console.log("Escuchando en " + config.listenPort);
+  console.log(`Escuchando en ${config.listenPort}`);
 });
