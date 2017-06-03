@@ -17,8 +17,8 @@ const delay = options.delay || 0;
 var express = require('express');
 var app = express();
 
-app.get('/', function (req, res) {
-  console.log(`[${serverName}] - Recibí un request de ${req.ip}`);
+app.all('/', function (req, res) {
+  console.log(`[${serverName}] - Recibí un request de tipo ${req.method} de ${req.ip}`);
   setTimeout(function() {
     res.send(`Saludos desde ${serverName}, son las ${(new Date().toString())}`);
   }, delay);
