@@ -1,23 +1,29 @@
 const commandLineArgs = require('command-line-args');
 
+//opciones de los parámetros
 const optionDefinitions = [
   { name: 'port', alias: 'p', type: Number },
-  { name: 'delay', alias: 'd', type: Number }
+  { name: 'delay', alias: 'd', type: Number },
+  { name: 'name', alias: 'n', type: String }
 ];
 
 const options = commandLineArgs(optionDefinitions);
-console.log(options);
+console.log("server configuration", options);
 
-const express = require('express');
+const listenPort = options.port || 3010;
+const serverName = options.name || 'default';
+const delay = options.delay || 0;
+
+var express = require('express');
 var app = express();
 
-//request de prueba
-app.get("/", (req, res) => {
-    console.log("Recibí un request de " + req.ip);
-    res.send("Hola, son las " + (new Date().toString()));
+app.get('/', function (req, res) {
+  console.log(`[${serverName}] - Recibí un request de ${req.ip}`);
+  setTimeout(function() {
+    res.send(`Saludos desde ${serverName}, son las ${(new Date().toString())}`);
+  }, delay);
 });
 
-//levanto el servidor
-app.listen(options.listenPort, () => {
-  console.log("Escuchando en " + options.port);
+app.listen(listenPort, function () {
+  console.log(`[${serverName}] - Escuchando en ${listenPort}!`);
 });
