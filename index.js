@@ -1,3 +1,4 @@
+const ServerManager = require('./modules/server-manager.js');
 const fs = require('fs');
 var config = null;
 
@@ -41,19 +42,27 @@ if(config.serverList.length == 0){
 }
 //************************************************************************ 
 
+var serverList = config.serverList.map(x => { 
+    return { host: x, online: true, lastAccess: new Date().getTime() };
+});
+
+const srvMan = new ServerManager(config.serverList);
+console.log(srvMan);
+
 const express = require('express');
 const Client = require('node-rest-client').Client;
 var app = express();
 
 //request de prueba
 app.get("/", (req, res) => {
-    console.log(`Recibí un request de ${req.ip}}`);
+    console.log(`Recibí un request de ${req.ip}`);
      
     var client = new Client();
-    
+    var theHost = srvMan.getServer();
+    console.log(`Se va a hacer un request al servidor ${theHost}`);
     //llamo a algún servidor externo
     //TODO: Falta acá llamar al planificador para tomar algún servidor de los seteados en el config
-    client.get("http://localhost:3002", (data, response) => {
+    client.get(theHost, (data, response) => {
         //parseo la respuesta
         if(Buffer.isBuffer(data)){
             data = data.toString('utf8');

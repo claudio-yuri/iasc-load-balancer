@@ -3,7 +3,8 @@
     "serverTimeout": 60,
     "serverExclusionTime": 120,
     "serverList": [
-        "localhost:3100",
-        "localhost:3200"        
+        "http://localhost:3100",
+        "http://localhost:3200",
+        "http://localhost:3300"        
     ]
 }
