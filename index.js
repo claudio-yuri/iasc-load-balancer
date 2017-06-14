@@ -42,10 +42,7 @@ if(config.serverList.length == 0){
 }
 //************************************************************************ 
 
-var serverList = config.serverList.map(x => { 
-    return { host: x, online: true, lastAccess: new Date().getTime() };
-});
-
+//instancio el server manager
 const srvMan = new ServerManager(config.serverList);
 console.log(srvMan);
 
@@ -61,7 +58,6 @@ app.get("/", (req, res) => {
     var theHost = srvMan.getServer();
     console.log(`Se va a hacer un request al servidor ${theHost}`);
     //llamo a algún servidor externo
-    //TODO: Falta acá llamar al planificador para tomar algún servidor de los seteados en el config
     client.get(theHost, (data, response) => {
         //parseo la respuesta
         if(Buffer.isBuffer(data)){
