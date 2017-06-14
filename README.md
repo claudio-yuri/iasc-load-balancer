@@ -17,10 +17,44 @@ Se corre con el comando
 ```bash
 $ nodejs index.js
 ```
-> TODO
 
 ### Mock Servers
 Se corre con el comando 
 ```bash
 $ nodejs mock_server.js --port NUMERODEPUERTO --delay ENMILISEGUNDOS --name NOMBREDELSERVER
 ```
+
+### Cómo lo levanto
+
+Revisás en archivo `config.json`
+
+Ahí vás a ver algo parecido a esto:
+``` javascript
+{
+    "listenPort": 3000,
+    "serverTimeout": 60,
+    "serverExclusionTime": 120,
+    "serverList": [ //esta es la lista de servidores
+        "http://localhost:3100",
+        "http://localhost:3200",
+        "http://localhost:3300"        
+    ]
+}
+```
+
+Luego, abrís varias consolas y vas levantando los mock server de la siguiente manera:
+
+``` bash
+# consola 1
+$ nodejs mock_server.js -p 3100
+# consola 2
+$ nodejs mock_server.js -p 3200
+# consola 3
+$ nodejs mock_server.js -p 3300
+```
+Finalmente, abrimos una consola más y levanamos el load balancer
+``` bash
+$ nodejs index.js
+```
+
+Ahora podemos abrir un navegador e intentar ingresar a la url donde está nuestro load balancer: `http://localhost:3000`.
