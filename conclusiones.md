@@ -76,3 +76,5 @@ Percentage of the requests served within a certain time (ms)
  100%    667 (longest request)
 ```
 Como conclusión, podemos decir que con cluster los requests tienden a tardar lo mismo (se aprecia en el menor desvío standard). En cuanto a tiempos son más o menos similares.
+
+Además probamos una arquitectura un poco más compleja: solo el nodo master se encargaba de mantener el listado de servidores y los clientes debían pedirle (por medio de IPC) al master cuál era el servidor al que debían hacer el request. Esto generaba mayor latencia e incluso algunos errores bastante frecuentes (tasas de error de más del 50%).
