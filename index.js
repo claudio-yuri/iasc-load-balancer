@@ -39,5 +39,5 @@ app.get("/", (req, res) => {
 
 //levanto el servidor
 app.listen(config.listenPort, () => {
-  console.log(`Escuchando en ${config.listenPort}`);
+    console.log(`Escuchando en ${config.listenPort}`);
 });

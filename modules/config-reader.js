@@ -3,7 +3,6 @@ module.exports = function(configFileName){
     const fs = require('fs');
 
     //levanto el archivo de configuración
-    console.log(configFileName);
     try
     {
         const configFile = fs.readFileSync(configFileName);
@@ -14,7 +13,6 @@ module.exports = function(configFileName){
         console.log(err, "no se pudo abrir el archivo de conifguración\n");
         process.exit();
     }
-    console.log(config);
 
     //reviso que no falten parámetros de configuración ***********************
     if(config.hasOwnProperty("listenPort") === false){
