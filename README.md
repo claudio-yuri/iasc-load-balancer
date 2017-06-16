@@ -10,6 +10,11 @@ TP Cuatrimestral de la materia Implementación de Arquitecturas Concurrentes
 ## Consigna
 [Link](https://docs.google.com/document/d/1hGKI62Sm0U0BmGuITR31SfEJEYz6LRKKzl7ptXFOrxA/pub)
 
+## Sobre la solución
+Decidimos usar nodejs por un tema de familiaridad con el código.
+
+La solución cuenta con un proceso master que levanta tantos procesos workers como CPUs haya disponibles en la computadora donde se corra. Cada uno de estos workers mantiene una lista de servidores disponibles a los cuáles dirigir los requests entrantes.
+
 ## Como usarlo
 
 ### Load Balancer
