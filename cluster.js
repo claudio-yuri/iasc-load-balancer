@@ -1,6 +1,6 @@
 var cluster = require('cluster');
 
-//cluster master processess
+//cluster master
 if (cluster.isMaster) {
     const numCPUs = require('os').cpus().length;
     console.log(`Starting up cluster with ${numCPUs} processes`);
@@ -22,7 +22,7 @@ if (cluster.isMaster) {
         cluster.fork();
     });
 }
-//cluster slave processes
+//cluster workers
 else{
     const configReader = require('./modules/config-reader.js');
     const config = configReader('./config.json');
