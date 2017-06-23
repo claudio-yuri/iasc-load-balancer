@@ -37,7 +37,7 @@ else{
     const configReader = require('./modules/config-reader.js');
     const config = configReader('./config.json');
     const ServerManager = require('./modules/server-manager.js');
-    const srvMan = new ServerManager(config.serverList);
+    const srvMan = new ServerManager(config.serverList, config.serverTimeout);
     const express = require('express');
     var app = express();
     const numberOfRetries = 3;

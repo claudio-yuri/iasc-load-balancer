@@ -1,74 +1,50 @@
-var redis = require("redis");
-
 //esta clase se encarga de controlar el listado de servidores
 //la idea es manejar la lista de servidores como una queue para lograr un comportamiento tipo round robin
 class ServerManager{
-    constructor(serverList){
-        // this._redisClient = redis.createClient();
-        this._serverList = serverList;/*.map(x => { 
-            // this._redisClient.rpush("server_list", x);
-            return { x };
-        });*/
-        this._offlineList = [];
-    }
-    //devuelve el host del primer servidor online
-    // getServer(){
-    //     //busco el primer servidor online
-    //     var srv = this._serverList.filter(x => x.online).shift();
-    //     if(srv != null){
-    //         //lo saco de la lista
-    //         var pos = this._serverList.indexOf(srv);
-    //         this._serverList.splice(pos, 1);
-            
-    //         //actualizo la fecha de último acceso
-    //         srv.lastAccess = new Date().getTime();
-    //         //lo mando al final de la cola
-    //         this._serverList.push(srv);
-            
-    //         return srv.host;
-    //     } else {
-    //         //TODO: tirar exception
-    //     }
-    // }
-    getServer(){
-        //busco el primer servidor online
-        // var srv = this._serverList.filter(x => x.online).shift();
-        var srv = this._serverList.shift();
-        if(srv != null){
-            //lo saco de la lista
-            // var pos = this._serverList.indexOf(srv);
-            // this._serverList.splice(pos, 1);
-            
-            //actualizo la fecha de último acceso
-            // srv.lastAccess = new Date().getTime();
-            //lo mando al final de la cola
-            this._serverList.push(srv);
-            
-            return srv;
-        } else {
-            console.log("lalalaalalalallalalalala", this._offlineList.length);
-            return null;
-            //TODO: tirar exception
+    constructor(serverList, timeout){
+        this._serverList = serverList;
+        this._serverStatus = {};
+        for (var pos in serverList){
+            this._serverStatus[serverList[pos]] = true;
         }
+        this._offlineList = [];
+        this._timeout = timeout;
+        this._nextPos = 0;
     }
-    //poner offline un server
-    setServerOffline(host){
-        // var servOff = this._serverList.filter(x => x.host == host);
-        // if(servOff != null && servOff.length > 0){
-        //     var pos = this._serverList.indexOf(servOff[0]);
-        //     this._serverList[pos].online = false;
-        // }
-        if(this._offlineList.indexOf(host) == -1) this._offlineList.push(host);
-        var pos = this._serverList.indexOf(host);
-        this._serverList.splice(pos, 1);
+    getNextPos(){
+        this._nextPos++;
+        if(this._nextPos >= this._serverList.length){
+            this._nextPos = 0;
+        }
+        return this._nextPos;
+    }
+    getServer(){
+        var max = this._serverList.length;
+        var cont = 0;
+        var result = null;
+        while (cont < max){
+            var pos = this.getNextPos();
+            if(this._serverStatus[this._serverList[pos]] === true){
+                result = this._serverList[pos];
+                break;
+            }
+            cont++;
+        }
+        return result;
     }
     //poner online un server
     setServerOnline(host){
-        this._serverList.push(host);
-        var pos = this._offlineList.indexOf(host);
-        if(pos != -1){
-            this._serverList.splice(pos, 1);
-        }
+        console.log(host + " online");
+        this._serverStatus[host] = true;
+    }
+    //poner offline un server
+    setServerOffline(host){
+        console.log(host + " offline");
+        this._serverStatus[host] = false;
+        var _this = this;
+        setTimeout(function() {
+            _this.setServerOnline(host);       
+        }, this._timeout * 1000);
     }
 }
 
