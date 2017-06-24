@@ -47,7 +47,7 @@ else{
     app.get("/", (req, res) => {
         console.log(`Recibí un request de ${req.ip}`);
         
-        makeRequest(srvMan, req, res, process, 0);
+        makeRequest(srvMan, req, res, process, config.maxRetryCount);
     });
 
     //levanto el servidor
@@ -73,7 +73,7 @@ function makeRequest(srvMan, req, res, process, retries){
         res.sendStatus(500);
     }
     //llamo a algún servidor externo
-    var r_req = client.get(theHost, (data, response) => {
+    var r_req = client.get(theHost, { requestConfig: { timeout: 2000 }, responseConfig: { timeout: 1000 } }, (data, response) => {
         //parseo la respuesta
         if(Buffer.isBuffer(data)){
             data = data.toString('utf8');
@@ -82,25 +82,32 @@ function makeRequest(srvMan, req, res, process, retries){
         res.send(`[${process.pid}] - ${data}`);
     });
 
+    //atiendo el evento de error del request al servidor destino
     r_req.on('error', (err) => {
         console.log('pucha request error');
-        srvMan.setServerOffline(theHost);
-        process.send({
-            pid: process.pid,
-            msg: 'serverDown',
-            host: theHost
-        });
-        if(retries < 3){
-            makeRequest(srvMan, req, res, process, (retries + 1));
-        }else{
-            res.sendStatus(400);
-        }
+        //pregunto si el header ya se envío porque los eventos de error y requestTimeout se pueden lanzar en simultáneo
+        if(!res.headerSent) handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries);
     });
-    // TODO: node-rest-client ya lanza eventos en caso de timeout
-    //       acá podemos aprovechar para marcar como no disponible al servidor que no responda
+
+    //atiendo el evento de timeout del request al servidor destino
     r_req.on('requestTimeout', function (req) {
         console.log('request has expired');
-        res.sendStatus(400);
-        // req.abort();
+        //pregunto si el header ya se envío porque los eventos de error y requestTimeout se pueden lanzar en simultáneo
+        if(!res.headerSent) handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries);
     });
+}
+
+function handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries){
+    srvMan.setServerOffline(theHost);
+    //le aviso al master que theHost no reponde para que le avise a los demás workers
+    process.send({
+        pid: process.pid,
+        msg: 'serverDown',
+        host: theHost
+    });
+    if(retries > 0){
+        makeRequest(srvMan, req, res, process, (retries--));
+    }else{
+        res.sendStatus(503);
+    }
 }
