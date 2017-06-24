@@ -57,23 +57,30 @@ else{
         console.info(`Recibí un request ${req.method} de ${req.ip}`);
         console.debug(req.url);
         
-        //intento obtener los datos del caché
-        redis_client.get(getCacheKey(req), (err, reply) => {
-            // console.debug(err);
-            // console.debug(reply);
-            if(reply !== null){
-                res.send(reply);
-            }
-            else{
-                //determino la cantidad de retries disponibles según el tipo de request
-                var maxNumberOfRetries = config.maxRetryCount;
-                if(req.method === "POST" || req.method === "PUT" || req.method === "DELETE"){
-                    maxNumberOfRetries = 0;
+        if(canUseCache(req)){
+            //intento obtener los datos del caché
+            redis_client.get(getCacheKey(req), (err, reply) => {
+                // console.debug(err);
+                // console.debug(reply);
+                if(reply !== null){
+                    //cache hit! respondo al cliente
+                    res.send(reply);
                 }
-                //procedo a hacer el request
-                makeRequest(srvMan, req, res, process, maxNumberOfRetries);
+                else{
+                    //cahce miss. procedo a hacer el request al server destino
+                    makeRequest(srvMan, req, res, process, config.maxRetryCount);
+                }
+            });
+        }
+        else{
+            //determino la cantidad de retries disponibles según el tipo de request
+            var maxNumberOfRetries = config.maxRetryCount;
+            if(req.method === "POST" || req.method === "PUT" || req.method === "DELETE"){
+                maxNumberOfRetries = 0;
             }
-        });
+            //procedo a hacer el request
+            makeRequest(srvMan, req, res, process, maxNumberOfRetries);
+        }
     });
 
     //levanto el servidor
@@ -86,6 +93,21 @@ else{
         console.debug(message);
         srvMan.setServerOffline(message.host);
     });
+}
+
+/**
+ * Determina si corresponde o no usar caché
+ * @param {Express.Request} req 
+ */
+function canUseCache(req){
+    // console.debug(req.headers);
+    // console.debug(req.header('cache-control'));
+    // console.debug(req.header('expires'));
+    var forbiddenByCacheControl = req.header('cache-control') !== undefined && req.header('cache-control') === "no-cache";
+    var forbiddenByExpiration = req.header('expires') !== undefined && req.header('expires') == 0;
+
+    // console.debug(`cc ${forbiddenByCacheControl} - exp ${forbiddenByExpiration}`);
+    return req.method === "GET" && !forbiddenByCacheControl && !forbiddenByExpiration;
 }
 
 /**
@@ -113,7 +135,7 @@ function makeRequest(srvMan, req, res, process, retries){
     //le pido un servidor al manager
     var theHost = srvMan.getServer();
     console.info(`[${process.pid}] Se va a hacer un request al servidor ${theHost}`);
-
+    
     if(theHost == null) {
         console.error(`[${process.pid}] no available servers`);
         res.sendStatus(500);
@@ -126,8 +148,10 @@ function makeRequest(srvMan, req, res, process, retries){
         }
         //respondo al cliente
         res.send(`[${process.pid}] - ${data}`);
-        //guardo en caché
-        redis_client.setex(getCacheKey(req), config.cacheTimeout, data);
+        if(canUseCache(req)){
+            //guardo en caché
+            redis_client.setex(getCacheKey(req), config.cacheTimeout, `[${process.pid}] - ${data}`);
+        }
     });
 
     //atiendo el evento de error del request al servidor destino
