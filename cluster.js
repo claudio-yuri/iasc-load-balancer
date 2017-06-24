@@ -7,6 +7,9 @@ var console = new Debug({
     consoleFilter:          config.debug? [] : ['LOG', 'WARN', 'DEBUG', 'INFO'],         // Filter these console output types 
     colors:                 true                     // do we want pretty pony colors in our console output? 
 });
+const Client = require('node-rest-client').Client;
+const ServerManager = require('./modules/server-manager.js');
+const express = require('express');
 // var redis = require("redis");
 
 //cluster master
@@ -41,26 +44,30 @@ if (cluster.isMaster) {
 }
 //cluster workers
 else{
-    const ServerManager = require('./modules/server-manager.js');
     const srvMan = new ServerManager(config.serverList, config.serverTimeout);
-    const express = require('express');
     var app = express();
     const numberOfRetries = 3;
     // var client = redis.createClient();
 
     //todos los requests entrantes
-    app.get("/", (req, res) => {
-        console.info(`Recibí un request de ${req.ip}`);
+    app.all("/", (req, res) => {
+        console.info(`Recibí un request ${req.method} de ${req.ip}`);
         
-        makeRequest(srvMan, req, res, process, config.maxRetryCount);
+        var maxNumberOfRetries = config.maxRetryCount;
+        if(req.method === "POST" || req.method === "PUT" || req.method === "DELETE"){
+            maxNumberOfRetries = 0;
+        }
+
+        makeRequest(srvMan, req, res, process, maxNumberOfRetries);
     });
 
     //levanto el servidor
     app.listen(config.listenPort, () => {
-        console.info(`Escuchando en ${config.listenPort}`);
+        console.info(`[${process.pid}] Escuchando en ${config.listenPort}`);
     });
 
     process.on("message", (message) => {
+        console.info(`[${process.pid}] server ${message.host} offline`);
         console.debug(message);
         srvMan.setServerOffline(message.host);
     });
@@ -68,7 +75,6 @@ else{
 
 
 function makeRequest(srvMan, req, res, process, retries){
-    const Client = require('node-rest-client').Client;
     var client = new Client();
     var theHost = srvMan.getServer();
     console.info(`[${process.pid}] Se va a hacer un request al servidor ${theHost}`);
