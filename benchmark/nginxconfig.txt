@@ -1,0 +1,12 @@
+upstream myapp {
+        server localhost:3100;
+        server localhost:3200;
+        server localhost:3300;
+}
+server {
+        listen 3001;
+
+        location / {
+                proxy_pass http://myapp;
+        }
+}
