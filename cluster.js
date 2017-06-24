@@ -1,10 +1,18 @@
 var cluster = require('cluster');
+var Debug = require('console-debug');
+const configReader = require('./modules/config-reader.js');
+const config = configReader('./config.json');
+var console = new Debug({
+    uncaughtExceptionCatch: false,                   // Do we want to catch uncaughtExceptions? 
+    consoleFilter:          config.debug? [] : ['LOG', 'WARN', 'DEBUG', 'INFO'],         // Filter these console output types 
+    colors:                 true                     // do we want pretty pony colors in our console output? 
+});
 // var redis = require("redis");
 
 //cluster master
 if (cluster.isMaster) {
     const numCPUs = require('os').cpus().length;
-    console.log(`Starting up cluster with ${numCPUs} processes`);
+    console.info(`Starting up cluster with ${numCPUs} processes`);
 
     //creamos tantos hilos como cpus tengamos disponibles
     for (var i = 0; i < numCPUs; i++) {
@@ -13,18 +21,17 @@ if (cluster.isMaster) {
 
     //definimos qué hacer una vez que se levanta cada worker
     cluster.on('online', (worker) => {
-        console.log(`Worker ${worker.process.pid} is online`);
+        console.info(`Worker ${worker.process.pid} is online`);
     });
 
     //definimos qué pasa cuando un worker se cae
     cluster.on('exit', (worker, code, signal) => {
-        console.log(`Worker ${worker.process.pid} died`);
-        console.log('Starting new worker...');
+        console.error(`Worker ${worker.process.pid} died`);
+        console.info('Starting new worker...');
         cluster.fork();
     });
-
+    //se reciben los mensajes de los workers
     cluster.on('message', (worker, message, handle) => {
-        // console.log(message.pid + ' said: "' + message.msg + '"');
         for (var x in cluster.workers){
             if(cluster.workers[x].process.pid != message.pid){
                 cluster.workers[x].send({ message: message.message, host: message.host} );
@@ -34,8 +41,6 @@ if (cluster.isMaster) {
 }
 //cluster workers
 else{
-    const configReader = require('./modules/config-reader.js');
-    const config = configReader('./config.json');
     const ServerManager = require('./modules/server-manager.js');
     const srvMan = new ServerManager(config.serverList, config.serverTimeout);
     const express = require('express');
@@ -45,18 +50,18 @@ else{
 
     //todos los requests entrantes
     app.get("/", (req, res) => {
-        console.log(`Recibí un request de ${req.ip}`);
+        console.info(`Recibí un request de ${req.ip}`);
         
         makeRequest(srvMan, req, res, process, config.maxRetryCount);
     });
 
     //levanto el servidor
     app.listen(config.listenPort, () => {
-        console.log(`Escuchando en ${config.listenPort}`);
+        console.info(`Escuchando en ${config.listenPort}`);
     });
 
     process.on("message", (message) => {
-        console.log(message);
+        console.debug(message);
         srvMan.setServerOffline(message.host);
     });
 }
@@ -66,10 +71,10 @@ function makeRequest(srvMan, req, res, process, retries){
     const Client = require('node-rest-client').Client;
     var client = new Client();
     var theHost = srvMan.getServer();
-    console.log(`[${process.pid}] Se va a hacer un request al servidor ${theHost}`);
+    console.info(`[${process.pid}] Se va a hacer un request al servidor ${theHost}`);
 
     if(theHost == null) {
-        console.log(`[${process.pid}] chau count ${srvMan._offlineList.length}`);
+        console.error(`[${process.pid}] no available servers`);
         res.sendStatus(500);
     }
     //llamo a algún servidor externo
@@ -84,14 +89,14 @@ function makeRequest(srvMan, req, res, process, retries){
 
     //atiendo el evento de error del request al servidor destino
     r_req.on('error', (err) => {
-        console.log('pucha request error');
+        console.error(`[${process.pid}] request error`);
         //pregunto si el header ya se envío porque los eventos de error y requestTimeout se pueden lanzar en simultáneo
         if(!res.headerSent) handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries);
     });
 
     //atiendo el evento de timeout del request al servidor destino
     r_req.on('requestTimeout', function (req) {
-        console.log('request has expired');
+        console.error(`[${process.pid}] request has expired`);
         //pregunto si el header ya se envío porque los eventos de error y requestTimeout se pueden lanzar en simultáneo
         if(!res.headerSent) handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries);
     });
@@ -106,8 +111,10 @@ function handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries
         host: theHost
     });
     if(retries > 0){
-        makeRequest(srvMan, req, res, process, (retries--));
+        console.debug(`[${process.pid}] remote server error. Remaining attemps ${--retries}`);
+        makeRequest(srvMan, req, res, process, (retries));
     }else{
+        console.error(`[${process.pid}] can't process request`);
         res.sendStatus(503);
     }
 }

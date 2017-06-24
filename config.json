@@ -3,6 +3,7 @@
     "serverTimeout": 10,
     "serverExclusionTime": 120,
     "maxRetryCount": 3,
+    "debug": true,
     "serverList": [
         "http://localhost:3100",
         "http://localhost:3200",

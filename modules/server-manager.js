@@ -34,12 +34,12 @@ class ServerManager{
     }
     //poner online un server
     setServerOnline(host){
-        console.log(host + " online");
+        // console.debug(host + " online");
         this._serverStatus[host] = true;
     }
     //poner offline un server
     setServerOffline(host){
-        console.log(host + " offline");
+        // console.debug(host + " offline");
         this._serverStatus[host] = false;
         var _this = this;
         setTimeout(function() {
