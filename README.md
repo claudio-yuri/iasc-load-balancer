@@ -20,7 +20,8 @@ La solución cuenta con un proceso master que levanta tantos procesos workers co
 ### Load Balancer
 Se corre con el comando 
 ```bash
-$ nodejs index.js
+$ nodejs index.js # versión mono proceso
+$ nodejs cluster.js # versión multi proceso
 ```
 
 ### Mock Servers
