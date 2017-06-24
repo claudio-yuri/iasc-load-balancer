@@ -29,6 +29,9 @@ Se corre con el comando
 $ nodejs mock_server.js --port NUMERODEPUERTO --delay ENMILISEGUNDOS --name NOMBREDELSERVER
 ```
 
+### Requisitos
+Tener redis corriendo en el servidor donde se despliegue el load balancer
+
 ### Cómo lo levanto
 
 Revisás en archivo `config.json`
@@ -37,8 +40,12 @@ Ahí vás a ver algo parecido a esto:
 ``` javascript
 {
     "listenPort": 3000,
-    "serverTimeout": 60,
-    "serverExclusionTime": 120,
+    "serverTimeout": 10, 
+    "serverExclusionTime": 10, //tiempo en segundos que se va a exlcuir a un servidor de la lista
+                               //luego de ese tiempo, se lo volverá a considerar para enviarle requests
+    "maxRetryCount": 3, //cantidad de retries máximo por request
+    "debug": true, //define si muestra o no informaición en la consola
+    "cacheTimeout": 10, //duración de la información en caché
     "serverList": [ //esta es la lista de servidores
         "http://localhost:3100",
         "http://localhost:3200",
@@ -63,3 +70,10 @@ $ nodejs index.js
 ```
 
 Ahora podemos abrir un navegador e intentar ingresar a la url donde está nuestro load balancer: `http://localhost:3000`.
+
+### Pruebas con apache bench
+Ejemplo de prueba
+```bash
+# usamos '-l' porque el contenido es dinámico y si no lo usamos ab interpreta el reqeust como fallido
+$ ab -n 1000 -c 100 -l http://localhost:3000/
+```

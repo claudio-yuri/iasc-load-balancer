@@ -39,6 +39,10 @@ module.exports = function(configFileName){
         config.debug = false;
     }
 
+    if(config.hasOwnProperty("cacheTimeout") === false){
+        config.cacheTimeout = 20;
+    }
+
     if(config.hasOwnProperty("serverList") === false){
         console.log("El archivo de configuración no cuenta con el parámetro serverList.");
         process.exit();
