@@ -30,6 +30,19 @@ module.exports = function(configFileName){
         process.exit();
     }
 
+    if(config.hasOwnProperty("maxRetryCount") === false){
+        console.log("El archivo de configuración no cuenta con el parámetro maxRetryCount.");
+        process.exit();
+    }
+
+    if(config.hasOwnProperty("debug") === false){
+        config.debug = false;
+    }
+
+    if(config.hasOwnProperty("cacheTimeout") === false){
+        config.cacheTimeout = 20;
+    }
+
     if(config.hasOwnProperty("serverList") === false){
         console.log("El archivo de configuración no cuenta con el parámetro serverList.");
         process.exit();

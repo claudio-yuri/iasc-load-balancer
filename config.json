@@ -1,10 +1,15 @@
 {
     "listenPort": 3000,
-    "serverTimeout": 60,
-    "serverExclusionTime": 120,
+    "serverTimeout": 10,
+    "serverExclusionTime": 10,
+    "maxRetryCount": 3,
+    "debug": false,
+    "cacheTimeout": 10,
     "serverList": [
         "http://localhost:3100",
         "http://localhost:3200",
-        "http://localhost:3300"        
+        "http://localhost:3300",
+        "http://localhost:3400",
+        "http://localhost:3500"
     ]
 }
