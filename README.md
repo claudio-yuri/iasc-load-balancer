@@ -6,6 +6,7 @@ TP Cuatrimestral de la materia Implementación de Arquitecturas Concurrentes
 * Juan Pablo de Blass
 * Marcos Paulucci
 * Claudio Yuri
+* Hernán Micelotta
 
 ## Consigna
 [Link](https://docs.google.com/document/d/1hGKI62Sm0U0BmGuITR31SfEJEYz6LRKKzl7ptXFOrxA/pub)
@@ -71,6 +72,7 @@ $ nodejs index.js
 ```
 
 Ahora podemos abrir un navegador e intentar ingresar a la url donde está nuestro load balancer: `http://localhost:3000`.
+<<<<<<< HEAD
 
 ### Pruebas con apache bench
 Ejemplo de prueba
@@ -78,3 +80,5 @@ Ejemplo de prueba
 # usamos '-l' porque el contenido es dinámico y si no lo usamos ab interpreta el reqeust como fallido
 $ ab -n 1000 -c 100 -l http://localhost:3000/
 ```
+=======
+>>>>>>> origin/master
