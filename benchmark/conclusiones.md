@@ -524,7 +524,137 @@ un mejor tiempo de respuesta.
 
 ## Escenario 3: 1 solo servidor destino
 
-El objetivo de esta prueba es comparar como se comportan ambos softwares con un solo servidore de destino, o sea, como un simple pasamanos.
+El objetivo de esta prueba es comparar como se comportan ambos software's con un solo servidor de destino, o sea, como un simple pasamanos.
 
 Con esto vamos a poder ver cuánto tiempo de procesamiento se agregra para realizar esta operación.
-> TODO
+### Cluster configuración 1:
+* 1 server de pasamanos
+```
+ab -n 1000 -c 100 http://localhost:3000/
+
+Server Software:
+Server Hostname:        localhost
+Server Port:            3000
+
+Document Path:          /
+Document Length:        103 bytes
+
+Concurrency Level:      100
+Time taken for tests:   1.801 seconds
+Complete requests:      1000
+Failed requests:        5
+   (Connect: 0, Receive: 0, Length: 5, Exceptions: 0)
+Total transferred:      304005 bytes
+HTML transferred:       103005 bytes
+Requests per second:    555.17 [#/sec] (mean)
+Time per request:       180.124 [ms] (mean)
+Time per request:       1.801 [ms] (mean, across all concurrent requests)
+Transfer rate:          164.82 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   1.9      0      43
+Processing:     7  141 110.0    115     864
+Waiting:        3   87 105.8     65     746
+Total:          7  141 110.2    116     864
+
+Percentage of the requests served within a certain time (ms)
+  50%    116
+  66%    128
+  75%    134
+  80%    150
+  90%    194
+  95%    392
+  98%    609
+  99%    724
+ 100%    864 (longest request)
+```
+
+### Nginx configuración 1:
+* 1 server de pasamanos
+```
+ab -n 1000 -c 100 http://localhost:3005/
+
+Server Software:        nginx/1.4.6
+Server Hostname:        localhost
+Server Port:            3005
+
+Document Path:          /
+Document Length:        94 bytes
+
+Concurrency Level:      100
+Time taken for tests:   1.355 seconds
+Complete requests:      1000
+Failed requests:        0
+Total transferred:      324000 bytes
+HTML transferred:       94000 bytes
+Requests per second:    737.98 [#/sec] (mean)
+Time per request:       135.505 [ms] (mean)
+Time per request:       1.355 [ms] (mean, across all concurrent requests)
+Transfer rate:          233.50 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   0.6      0       6
+Processing:     9  127  37.3    125     257
+Waiting:        5   71  35.8     71     142
+Total:          9  128  37.3    126     258
+WARNING: The median and mean for the initial connection time are not within a normal deviation
+        These results are probably not that reliable.
+
+Percentage of the requests served within a certain time (ms)
+  50%    126
+  66%    129
+  75%    132
+  80%    134
+  90%    158
+  95%    227
+  98%    239
+  99%    247
+ 100%    258 (longest request)
+```
+### Server destino:
+* Server directo, sin pasamanos
+```
+ab -n 1000 -c 100 http://localhost:3100/
+
+Server Software:
+Server Hostname:        localhost
+Server Port:            3100
+
+Document Path:          /
+Document Length:        94 bytes
+
+Concurrency Level:      100
+Time taken for tests:   0.801 seconds
+Complete requests:      1000
+Failed requests:        0
+Total transferred:      294000 bytes
+HTML transferred:       94000 bytes
+Requests per second:    1247.92 [#/sec] (mean)
+Time per request:       80.133 [ms] (mean)
+Time per request:       0.801 [ms] (mean, across all concurrent requests)
+Transfer rate:          358.29 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.1      0       3
+Processing:    16   76  21.8     77     157
+Waiting:        3   43  19.9     42      83
+Total:         16   76  21.8     77     157
+
+Percentage of the requests served within a certain time (ms)
+  50%     77
+  66%     79
+  75%     81
+  80%     82
+  90%    110
+  95%    126
+  98%    136
+  99%    139
+ 100%    157 (longest request)
+```
+
+Como podemos ver, existe una diferencia a favor de nginx de 1/2 segundo.
+Agregando 1 segundo usando nuestro load balancer y 0.554 segundos
+usando ngnix, con respecto al request al server destino sin intermediarios.
