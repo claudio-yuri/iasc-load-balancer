@@ -24,6 +24,13 @@ app.all('/', function (req, res) {
   }, delay);
 });
 
+// Respuesta para el Heartbeat
+
+app.route('/heartbeat').get(function (req, res) {
+    console.log('me llego un heartbeat request - respondo ok');
+    res.json({status: 'ok'})
+});
+
 app.listen(listenPort, function () {
   console.log(`[${serverName}] - Escuchando en ${listenPort}!`);
 }).on('error', function(err) {
