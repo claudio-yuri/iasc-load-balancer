@@ -260,130 +260,132 @@ El objetivo de esta prueba es ver como se comporta nuestra solución frente a ng
 * 3 servers (2 levantados, 1 caído)
 * 0 segundos de exclusión (sin exclusión) para servidor caído
 ```
-ab -n 1000 -c 100 http://localhost:3000/
+ab -n 1000 -c 100 -l http://localhost:3000/
 
 Server Software:
 Server Hostname:        localhost
 Server Port:            3000
 
 Document Path:          /
-Document Length:        104 bytes
+Document Length:        Variable
 
 Concurrency Level:      100
-Time taken for tests:   1.828 seconds
+Time taken for tests:   1.091 seconds
 Complete requests:      1000
-Failed requests:        56
-   (Connect: 0, Receive: 0, Length: 56, Exceptions: 0)
-Total transferred:      304944 bytes
-HTML transferred:       103944 bytes
-Requests per second:    547.02 [#/sec] (mean)
-Time per request:       182.808 [ms] (mean)
-Time per request:       1.828 [ms] (mean, across all concurrent requests)
-Transfer rate:          162.90 [Kbytes/sec] received
+Failed requests:        0
+Total transferred:      279000 bytes
+HTML transferred:       79000 bytes
+Requests per second:    916.88 [#/sec] (mean)
+Time per request:       109.065 [ms] (mean)
+Time per request:       1.091 [ms] (mean, across all concurrent requests)
+Transfer rate:          249.81 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    1   2.8      0      63
-Processing:     6  151 239.1     94    1821
-Waiting:        3  104 238.3     54    1814
-Total:          7  152 239.5     94    1821
+Connect:        0    0   1.3      0       8
+Processing:    33  107 154.4     55     630
+Waiting:       33  106 154.3     55     630
+Total:         33  107 155.4     55     636
 
 Percentage of the requests served within a certain time (ms)
-  50%     94
-  66%    109
-  75%    126
-  80%    135
-  90%    174
-  95%    446
-  98%    847
-  99%   1673
- 100%   1821 (longest request)
+  50%     55
+  66%     60
+  75%     64
+  80%     69
+  90%    523
+  95%    568
+  98%    600
+  99%    607
+ 100%    636 (longest request)
+
 ```
 ### Cluster configuración 2:
 * 3 servers (2 levantados, 1 caído)
 * 1 segundos de exclusión para servidor caído
 ```
-ab -n 1000 -c 100 http://localhost:3000/
+ab -n 1000 -c 100 -l http://localhost:3000/
 
 Server Software:
 Server Hostname:        localhost
 Server Port:            3000
 
 Document Path:          /
-Document Length:        103 bytes
+Document Length:        Variable
 
 Concurrency Level:      100
-Time taken for tests:   1.742 seconds
+Time taken for tests:   0.653 seconds
 Complete requests:      1000
-Failed requests:        884
-   (Connect: 0, Receive: 0, Length: 884, Exceptions: 0)
-Total transferred:      304586 bytes
-HTML transferred:       103586 bytes
-Requests per second:    573.91 [#/sec] (mean)
-Time per request:       174.244 [ms] (mean)
-Time per request:       1.742 [ms] (mean, across all concurrent requests)
-Transfer rate:          170.71 [Kbytes/sec] received
+Failed requests:        0
+Total transferred:      280000 bytes
+HTML transferred:       80000 bytes
+Requests per second:    1531.53 [#/sec] (mean)
+Time per request:       65.294 [ms] (mean)
+Time per request:       0.653 [ms] (mean, across all concurrent requests)
+Transfer rate:          418.78 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    0   0.4      0      10
-Processing:     6  145 181.2    105    1736
-Waiting:        3   96 178.6     59    1708
-Total:          6  146 181.2    106    1736
+Connect:        0    0   0.8      0       5
+Processing:    29   63  34.5     54     202
+Waiting:       29   62  34.4     54     202
+Total:         29   63  35.1     54     204
 
 Percentage of the requests served within a certain time (ms)
-  50%    106
-  66%    113
-  75%    118
-  80%    122
-  90%    216
-  95%    406
-  98%    743
-  99%   1413
- 100%   1736 (longest request)
+  50%     54
+  66%     61
+  75%     65
+  80%     71
+  90%    110
+  95%    159
+  98%    174
+  99%    182
+ 100%    204 (longest request)
+
 ```
 
 ### Cluster configuración 3:
 * 3 servers (2 levantados, 1 caído)
 * 5 segundos de exclusión para servidor caído
 ```
-ab -n 1000 -c 100 http://localhost:3000/
+ab -n 1000 -c 100 -l http://localhost:3000/
 
 Server Software:
 Server Hostname:        localhost
 Server Port:            3000
 
 Document Path:          /
-Document Length:        103 bytes
+Document Length:        Variable
 
 Concurrency Level:      100
-Time taken for tests:   1.151 seconds
+Time taken for tests:   0.657 seconds
 Complete requests:      1000
 Failed requests:        0
-Total transferred:      304000 bytes
-HTML transferred:       103000 bytes
-Requests per second:    868.91 [#/sec] (mean)
-Time per request:       115.087 [ms] (mean)
-Time per request:       1.151 [ms] (mean, across all concurrent requests)
-Transfer rate:          257.96 [Kbytes/sec] received
+Total transferred:      280000 bytes
+HTML transferred:       80000 bytes
+Requests per second:    1522.04 [#/sec] (mean)
+Time per request:       65.701 [ms] (mean)
+Time per request:       0.657 [ms] (mean, across all concurrent requests)
+Transfer rate:          416.18 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    0   0.3      0       4
-Processing:     7  106  29.9    109     243
-Waiting:        3   56  32.2     54     143
-Total:          7  106  29.9    109     243
+Connect:        0    0   0.6      0       6
+Processing:    34   63  28.6     57     170
+Waiting:       34   63  28.5     57     170
+Total:         34   64  29.0     57     173
 
 Percentage of the requests served within a certain time (ms)
-  50%    109
-  66%    116
-  75%    122
-  80%    125
-  90%    129
-  95%    134
-  98%    185
-  99%    217
- 100%    243 (longest request)
+  50%     57
+  66%     64
+  75%     67
+  80%     70
+  90%     99
+  95%    145
+  98%    162
+  99%    167
+ 100%    173 (longest request)
+
+
 ```
 ### Cluster configuración 4:
 * 5 servers (3 levantados, 2 caídos)
@@ -432,88 +434,84 @@ Percentage of the requests served within a certain time (ms)
 ### Nginx configuración 1:
 * 3 servers (2 levantados, 1 caído)
 ```
-ab -n 1000 -c 100 http://localhost:3005/
+ab -n 1000 -c 100 -l http://localhost:3005/
 
-Server Software:        nginx/1.4.6
+Server Software:        nginx/1.10.0
 Server Hostname:        localhost
-Server Port:            3005
+Server Port:            3001
 
 Document Path:          /
-Document Length:        94 bytes
+Document Length:        Variable
 
 Concurrency Level:      100
-Time taken for tests:   2.479 seconds
+Time taken for tests:   0.260 seconds
 Complete requests:      1000
 Failed requests:        0
-Total transferred:      324000 bytes
-HTML transferred:       94000 bytes
-Requests per second:    403.39 [#/sec] (mean)
-Time per request:       247.898 [ms] (mean)
-Time per request:       2.479 [ms] (mean, across all concurrent requests)
-Transfer rate:          127.64 [Kbytes/sec] received
+Total transferred:      301000 bytes
+HTML transferred:       70000 bytes
+Requests per second:    3850.54 [#/sec] (mean)
+Time per request:       25.970 [ms] (mean)
+Time per request:       0.260 [ms] (mean, across all concurrent requests)
+Transfer rate:          1131.85 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    1   0.6      0       7
-Processing:    10  243 293.4    147    1365
-Waiting:        6  181 301.5     89    1225
-Total:         10  244 293.3    148    1365
-WARNING: The median and mean for the initial connection time are not within a normal deviation
-        These results are probably not that reliable.
+Connect:        0    1   1.5      0       8
+Processing:     3   24  14.4     22      63
+Waiting:        3   24  14.4     22      63
+Total:          3   25  14.5     23      64
 
 Percentage of the requests served within a certain time (ms)
-  50%    148
-  66%    152
-  75%    155
-  80%    162
-  90%   1006
-  95%   1106
-  98%   1173
-  99%   1187
- 100%   1365 (longest request)
+  50%     23
+  66%     33
+  75%     35
+  80%     36
+  90%     45
+  95%     49
+  98%     58
+  99%     63
+ 100%     64 (longest request)
+
 ```
 ### Nginx configuración 2:
 * 5 servers (3 levantados, 2 caídos)
 ```
-ab -n 1000 -c 100 http://localhost:3005/
-
-Server Software:        nginx/1.4.6
+Server Software:        nginx/1.10.0
 Server Hostname:        localhost
-Server Port:            3005
+Server Port:            3001
 
 Document Path:          /
-Document Length:        94 bytes
+Document Length:        Variable
 
 Concurrency Level:      100
-Time taken for tests:   3.464 seconds
+Time taken for tests:   0.252 seconds
 Complete requests:      1000
 Failed requests:        0
-Total transferred:      324000 bytes
-HTML transferred:       94000 bytes
-Requests per second:    288.66 [#/sec] (mean)
-Time per request:       346.426 [ms] (mean)
-Time per request:       3.464 [ms] (mean, across all concurrent requests)
-Transfer rate:          91.33 [Kbytes/sec] received
+Total transferred:      301000 bytes
+HTML transferred:       70000 bytes
+Requests per second:    3968.08 [#/sec] (mean)
+Time per request:       25.201 [ms] (mean)
+Time per request:       0.252 [ms] (mean, across all concurrent requests)
+Transfer rate:          1166.40 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    1   0.5      0       5
-Processing:     8  342 601.8    140    2707
-Waiting:        4  284 611.1     87    2620
-Total:          9  342 601.7    141    2707
-ERROR: The median and mean for the initial connection time are more than twice the standard
-       deviation apart. These results are NOT reliable.
+Connect:        0    1   1.8      0       8
+Processing:     1   23  22.3     10      77
+Waiting:        1   23  22.4      9      77
+Total:          1   24  22.3     12      77
 
 Percentage of the requests served within a certain time (ms)
-  50%    141
-  66%    145
-  75%    149
-  80%    171
-  90%   1149
-  95%   2113
-  98%   2172
-  99%   2205
- 100%   2707 (longest request)
+  50%     12
+  66%     30
+  75%     48
+  80%     51
+  90%     55
+  95%     63
+  98%     68
+  99%     74
+ 100%     77 (longest request)
+
 ```
 Como se observa, al contrario del escenario 1, 
 nuestra solución tiene un tiempo de respuesta mayor que nginx, 
@@ -530,131 +528,127 @@ Con esto vamos a poder ver cuánto tiempo de procesamiento se agregra para reali
 ### Cluster configuración 1:
 * 1 server de pasamanos
 ```
-ab -n 1000 -c 100 http://localhost:3000/
+ab -n 1000 -c 100 -l http://localhost:3000/
 
 Server Software:
 Server Hostname:        localhost
 Server Port:            3000
 
 Document Path:          /
-Document Length:        103 bytes
+Document Length:        Variable
 
 Concurrency Level:      100
-Time taken for tests:   1.801 seconds
+Time taken for tests:   0.668 seconds
 Complete requests:      1000
-Failed requests:        5
-   (Connect: 0, Receive: 0, Length: 5, Exceptions: 0)
-Total transferred:      304005 bytes
-HTML transferred:       103005 bytes
-Requests per second:    555.17 [#/sec] (mean)
-Time per request:       180.124 [ms] (mean)
-Time per request:       1.801 [ms] (mean, across all concurrent requests)
-Transfer rate:          164.82 [Kbytes/sec] received
+Failed requests:        0
+Total transferred:      280000 bytes
+HTML transferred:       80000 bytes
+Requests per second:    1496.61 [#/sec] (mean)
+Time per request:       66.818 [ms] (mean)
+Time per request:       0.668 [ms] (mean, across all concurrent requests)
+Transfer rate:          409.23 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    1   1.9      0      43
-Processing:     7  141 110.0    115     864
-Waiting:        3   87 105.8     65     746
-Total:          7  141 110.2    116     864
+Connect:        0    0   0.8      0       5
+Processing:    32   65  35.6     56     201
+Waiting:       32   64  35.6     56     201
+Total:         32   65  36.2     56     202
 
 Percentage of the requests served within a certain time (ms)
-  50%    116
-  66%    128
-  75%    134
-  80%    150
-  90%    194
-  95%    392
-  98%    609
-  99%    724
- 100%    864 (longest request)
+  50%     56
+  66%     61
+  75%     65
+  80%     67
+  90%    138
+  95%    166
+  98%    186
+  99%    194
+ 100%    202 (longest request)
+
 ```
 
 ### Nginx configuración 1:
 * 1 server de pasamanos
 ```
-ab -n 1000 -c 100 http://localhost:3005/
+ab -n 1000 -c 100 -l http://localhost:3005/
 
-Server Software:        nginx/1.4.6
+Server Software:        nginx/1.10.0
 Server Hostname:        localhost
-Server Port:            3005
+Server Port:            3001
 
 Document Path:          /
-Document Length:        94 bytes
+Document Length:        Variable
 
 Concurrency Level:      100
-Time taken for tests:   1.355 seconds
+Time taken for tests:   0.394 seconds
 Complete requests:      1000
 Failed requests:        0
-Total transferred:      324000 bytes
-HTML transferred:       94000 bytes
-Requests per second:    737.98 [#/sec] (mean)
-Time per request:       135.505 [ms] (mean)
-Time per request:       1.355 [ms] (mean, across all concurrent requests)
-Transfer rate:          233.50 [Kbytes/sec] received
+Total transferred:      301000 bytes
+HTML transferred:       70000 bytes
+Requests per second:    2538.39 [#/sec] (mean)
+Time per request:       39.395 [ms] (mean)
+Time per request:       0.394 [ms] (mean, across all concurrent requests)
+Transfer rate:          746.15 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    1   0.6      0       6
-Processing:     9  127  37.3    125     257
-Waiting:        5   71  35.8     71     142
-Total:          9  128  37.3    126     258
-WARNING: The median and mean for the initial connection time are not within a normal deviation
-        These results are probably not that reliable.
+Connect:        0    0   0.6      0       3
+Processing:    27   38   6.7     38      64
+Waiting:       27   38   6.7     38      64
+Total:         27   38   6.9     38      65
 
 Percentage of the requests served within a certain time (ms)
-  50%    126
-  66%    129
-  75%    132
-  80%    134
-  90%    158
-  95%    227
-  98%    239
-  99%    247
- 100%    258 (longest request)
+  50%     38
+  66%     43
+  75%     44
+  80%     45
+  90%     47
+  95%     48
+  98%     51
+  99%     56
+ 100%     65 (longest request)
+
 ```
 ### Server destino:
 * Server directo, sin pasamanos
 ```
-ab -n 1000 -c 100 http://localhost:3100/
-
-Server Software:
-Server Hostname:        localhost
-Server Port:            3100
+ab -n 1000 -c 100 -l http://localhost:3100/
 
 Document Path:          /
-Document Length:        94 bytes
+Document Length:        Variable
 
 Concurrency Level:      100
-Time taken for tests:   0.801 seconds
+Time taken for tests:   0.314 seconds
 Complete requests:      1000
 Failed requests:        0
-Total transferred:      294000 bytes
-HTML transferred:       94000 bytes
-Requests per second:    1247.92 [#/sec] (mean)
-Time per request:       80.133 [ms] (mean)
-Time per request:       0.801 [ms] (mean, across all concurrent requests)
-Transfer rate:          358.29 [Kbytes/sec] received
+Total transferred:      270000 bytes
+HTML transferred:       70000 bytes
+Requests per second:    3180.60 [#/sec] (mean)
+Time per request:       31.441 [ms] (mean)
+Time per request:       0.314 [ms] (mean, across all concurrent requests)
+Transfer rate:          838.63 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    0   0.1      0       3
-Processing:    16   76  21.8     77     157
-Waiting:        3   43  19.9     42      83
-Total:         16   76  21.8     77     157
+Connect:        0    1   0.4      1       2
+Processing:    14   30   6.2     29      46
+Waiting:        9   26   6.2     26      46
+Total:         17   31   6.0     30      46
 
 Percentage of the requests served within a certain time (ms)
-  50%     77
-  66%     79
-  75%     81
-  80%     82
-  90%    110
-  95%    126
-  98%    136
-  99%    139
- 100%    157 (longest request)
+  50%     30
+  66%     31
+  75%     31
+  80%     32
+  90%     45
+  95%     46
+  98%     46
+  99%     46
+ 100%     46 (longest request)
+
 ```
 
-Como podemos ver, existe una diferencia a favor de nginx de 1/2 segundo.
-Agregando 1 segundo usando nuestro load balancer y 0.554 segundos
+Como podemos ver, existe una diferencia a favor de nginx de 27,423 ms en el tiempo medio por request.
+Agregando 39,395 micro segundos usando nuestro load balancer y 7,954 microsegundos
 usando ngnix, con respecto al request al server destino sin intermediarios.
