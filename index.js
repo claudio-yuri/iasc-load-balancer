@@ -23,6 +23,11 @@ app.get("/", (req, res) => {
 //levanto el servidor
 app.listen(config.listenPort, () => {
     console.log(`Escuchando en ${config.listenPort}`);
+}).on('error', function(err) {
+    if (err.errno === 'EADDRINUSE')
+        console.log('Puerto ocupado');
+    else
+        console.log(err);
 });
 
 

@@ -26,4 +26,9 @@ app.all('/', function (req, res) {
 
 app.listen(listenPort, function () {
   console.log(`[${serverName}] - Escuchando en ${listenPort}!`);
+}).on('error', function(err) {
+    if (err.errno === 'EADDRINUSE')
+        console.log('Puerto ocupado');
+    else
+        console.log(err);
 });

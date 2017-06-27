@@ -86,6 +86,11 @@ else{
     //levanto el servidor
     app.listen(config.listenPort, () => {
         console.info(`[${process.pid}] Escuchando en ${config.listenPort}`);
+    }).on('error', function(err) {
+        if (err.errno === 'EADDRINUSE')
+            console.log('Puerto ocupado');
+        else
+            console.log(err);
     });
 
     process.on("message", (message) => {
