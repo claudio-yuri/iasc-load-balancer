@@ -69,7 +69,7 @@ else{
                 }
                 else{
                     //cahce miss. procedo a hacer el request al server destino
-                    makeRequest(srvMan, req, res, process, config.maxRetryCount);
+                    makeRequest(srvMan, req, res, process, config.maxRetryCount,[]);
                 }
             });
         }
@@ -80,7 +80,7 @@ else{
                 maxNumberOfRetries = 0;
             }
             //procedo a hacer el request
-            makeRequest(srvMan, req, res, process, maxNumberOfRetries);
+            makeRequest(srvMan, req, res, process, maxNumberOfRetries,[]);
         }
     });
 
@@ -106,6 +106,34 @@ else{
         console.info('se registró el heartbeat');
         new ServerSupervisor(srvMan, config);
         res.json({status: 'heartbeat ok'})
+    });
+
+    config.requests.forEach(function (request) {
+
+        app.all(request.url, (req, res) => {
+            console.log(`Recibí un request ${req.method} de ${req.ip}`);
+            console.log(req.url);
+
+            if(canUseCache(req)){
+                //intento obtener los datos del caché
+                redis_client.get(getCacheKey(req), (err, reply) => {
+                    // console.debug(err);
+                    // console.debug(reply);
+                    if(reply !== null){
+                        //cache hit! respondo al cliente
+                        res.send(reply);
+                    }
+                    else{
+                        //cahce miss. procedo a hacer el request al server destino
+                        makeRequest(srvMan, req, res, process, request.servers.length-1, request.servers);
+                    }
+                });
+            }
+            else{
+                //procedo a hacer el request
+                makeRequest(srvMan, req, res, process, request.servers.length-1,request.servers);
+            }
+        });
     });
 }
 
@@ -144,18 +172,24 @@ function getCacheKey(req){
  * @param {Process} process 
  * @param {number} retries la cantidad de reintentos disponibles
  */
-function makeRequest(srvMan, req, res, process, retries){
+function makeRequest(srvMan, req, res, process, retries, serverList){
     var client = new Client();
+    var theHost;
     //le pido un servidor al manager
-    var theHost = srvMan.getServer();
+    if(serverList.length != 0)
+        theHost = srvMan.getServerFrom(serverList);
+    else
+        theHost = srvMan.getServer();
+
     console.info(`[${process.pid}] Se va a hacer un request al servidor ${theHost}`);
     
     if(theHost == null) {
         console.error(`[${process.pid}] no available servers`);
-        res.sendStatus(500);
+        res.sendStatus(502);
+        return;
     }
     //llamo a algún servidor externo
-    var r_req = client.get(theHost, { requestConfig: { timeout: 2000 }, responseConfig: { timeout: 1000 } }, (data, response) => {
+    var r_req = client.get(theHost+req.url, { requestConfig: { timeout: 2000 }, responseConfig: { timeout: 1000 } }, (data, response) => {
         //parseo la respuesta
         if(Buffer.isBuffer(data)){
             data = data.toString('utf8');
@@ -171,8 +205,10 @@ function makeRequest(srvMan, req, res, process, retries){
     //atiendo el evento de error del request al servidor destino
     r_req.on('error', (err) => {
         console.error(`[${process.pid}] request error`);
+        if(serverList.length != 0)
+            serverList = serverList.slice(1, serverList.length);
         //pregunto si el header ya se envío porque los eventos de error y requestTimeout se pueden lanzar en simultáneo
-        if(!res.headerSent) handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries);
+        if(!res.headerSent) handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries,serverList);
     });
 
     //atiendo el evento de timeout del request al servidor destino
@@ -192,7 +228,7 @@ function makeRequest(srvMan, req, res, process, retries){
  * @param {Process} process 
  * @param {number} retries la cantidad de reintentos disponibles
  */
-function handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries){
+function handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries,serverList){
     srvMan.setServerOffline(theHost);
     //le aviso al master que theHost no reponde para que le avise a los demás workers
     process.send({
@@ -201,8 +237,8 @@ function handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries
         host: theHost
     });
     if(retries > 0){
-        console.debug(`[${process.pid}] remote server error. Remaining attemps ${--retries}`);
-        makeRequest(srvMan, req, res, process, (retries));
+        console.log(`[${process.pid}] remote server error. Remaining attemps ${--retries}`);
+        makeRequest(srvMan, req, res, process, (retries),serverList);
     }else{
         console.error(`[${process.pid}] can't process request`);
         res.sendStatus(503);

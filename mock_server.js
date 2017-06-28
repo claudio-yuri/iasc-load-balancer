@@ -31,6 +31,15 @@ app.route('/heartbeat').get(function (req, res) {
     res.json({status: 'ok'})
 });
 
+//cualquier otra ruta
+app.all('*', function (req, res) {
+    console.log(`[${serverName}] - Recibí un request de tipo ${req.method} de ${req.ip}`);
+    setTimeout(function() {
+        res.send(`Saludos desde ${serverName}, son las ${(new Date().toString())}`);
+    }, delay);
+});
+
+
 app.listen(listenPort, function () {
   console.log(`[${serverName}] - Escuchando en ${listenPort}!`);
 }).on('error', function(err) {

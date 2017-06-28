@@ -32,6 +32,19 @@ class ServerManager{
         }
         return result;
     }
+    getServerFrom(serverList){
+        var max = serverList.length;
+        var pos = 0;   //si se quiere distribuir, hacer un random de 0 a max-1
+        var result = null;
+        while (pos < max){
+            if(this.isServerOnline(serverList[pos])){
+                result = serverList[pos];
+                break;
+            }
+            pos++;
+        }
+        return result;
+    }
     //devuelve true si el server está online
     isServerOnline(host) {
         return this._serverStatus[host];

@@ -64,9 +64,24 @@ Ahí vás a ver algo parecido a esto:
     ],
     "heartbeat":{
       "executionInterval":10
-    }
+    },
+    "requests":[{
+                  "url": "/asd",
+                  "servers": ["http://localhost:3200",
+                              "http://localhost:3300"]
+                },
+                {
+                  "url": "/hello",
+                  "servers": ["http://localhost:3100"]
+                },
+                {
+                  "url": "*",
+                  "servers": ["http://localhost:3500"]
+                }
+    ]
 }
 ```
+>observaciones: "url": "*" representa la opcion: en caso contario (default)
 
 Luego, abrís varias consolas y vas levantando los mock server de la siguiente manera:
 
