@@ -19,7 +19,7 @@ var redis_client = redis.createClient();
 
 //cluster master
 if (cluster.isMaster) {
-    const numCPUs = 8;//require('os').cpus().length;
+    const numCPUs = require('os').cpus().length;
     console.info(`Starting up cluster with ${numCPUs} processes`);
 
     //creamos tantos hilos como cpus tengamos disponibles
