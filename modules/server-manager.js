@@ -24,7 +24,7 @@ class ServerManager{
         var result = null;
         while (cont < max){
             var pos = this.getNextPos();
-            if(this._serverStatus[this._serverList[pos]] === true){
+            if(this.isServerOnline(this._serverList[pos])){
                 result = this._serverList[pos];
                 break;
             }
@@ -32,6 +32,11 @@ class ServerManager{
         }
         return result;
     }
+    //devuelve true si el server está online
+    isServerOnline(host) {
+        return this._serverStatus[host];
+    }
+
     //poner online un server
     setServerOnline(host){
         // console.debug(host + " online");

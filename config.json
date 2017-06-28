@@ -1,7 +1,7 @@
 {
     "listenPort": 3000,
     "serverTimeout": 10,
-    "serverExclusionTime": 10,
+    "serverExclusionTime": 100000,
     "maxRetryCount": 3,
     "debug": false,
     "cacheTimeout": 10,
@@ -11,5 +11,8 @@
         "http://localhost:3300",
         "http://localhost:3400",
         "http://localhost:3500"
-    ]
+    ],
+    "heartbeat":{
+      "executionInterval":10
+    }
 }

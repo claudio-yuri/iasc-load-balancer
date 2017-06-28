@@ -3,15 +3,16 @@ var Debug = require('console-debug');
 const configReader = require('./modules/config-reader.js');
 const config = configReader('./config.json');
 var console = new Debug({
-    // Do we want to catch uncaughtExceptions? 
+    // Do we want to catch uncaughtExceptions?
     uncaughtExceptionCatch: false,
-    // Filter these console output types 
+    // Filter these console output types
     consoleFilter:          config.debug? [] : ['LOG', 'WARN', 'DEBUG', 'INFO'],
-    // do we want pretty pony colors in our console output? 
+    // do we want pretty pony colors in our console output?
     colors:                 true
 });
 const Client = require('node-rest-client').Client;
 const ServerManager = require('./modules/server-manager.js');
+const ServerSupervisor = require('./modules/server-supervisor.js');
 const express = require('express');
 var redis = require('redis');
 var redis_client = redis.createClient();
@@ -85,18 +86,26 @@ else{
 
     //levanto el servidor
     app.listen(config.listenPort, () => {
+        console.info(`Se levanta el load balancer`);
         console.info(`[${process.pid}] Escuchando en ${config.listenPort}`);
     }).on('error', function(err) {
         if (err.errno === 'EADDRINUSE')
-            console.log('Puerto ocupado');
+            console.debug('Puerto ocupado '+config.listenPort);
         else
-            console.log(err);
+            console.debug(err);
     });
 
     process.on("message", (message) => {
         console.info(`[${process.pid}] server ${message.host} offline`);
         console.debug(message);
         srvMan.setServerOffline(message.host);
+    });
+
+    //se agrega la ruta para registrar el heartbeat
+    app.route('/register').get(function (req, res) {
+        console.info('se registró el heartbeat');
+        new ServerSupervisor(srvMan, config);
+        res.json({status: 'heartbeat ok'})
     });
 }
 

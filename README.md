@@ -30,6 +30,15 @@ Se corre con el comando
 ```bash
 $ nodejs mock_server.js --port NUMERODEPUERTO --delay ENMILISEGUNDOS --name NOMBREDELSERVER
 ```
+### Supervisor
+Opcionalmente se puede usar un heartbeat para monitorear los mock servers,
+permitiendo que si se caen uno o más servers se marquen como offline para evitar request a servers caídos.
+ Cuando el servidor se normaliza se vuelve a poner online para volver a recibir tráfico.
+ 
+ Para registrar el heartbeat, con el load balancer levantado abrir un navegador e ingresar: 
+ ```
+http://localhost:3000/register
+```
 
 ### Requisitos
 Tener redis corriendo en el servidor donde se despliegue el load balancer
@@ -52,7 +61,10 @@ Ahí vás a ver algo parecido a esto:
         "http://localhost:3100",
         "http://localhost:3200",
         "http://localhost:3300"        
-    ]
+    ],
+    "heartbeat":{
+      "executionInterval":10
+    }
 }
 ```
 
@@ -68,11 +80,11 @@ $ nodejs mock_server.js -p 3300
 ```
 Finalmente, abrimos una consola más y levanamos el load balancer
 ``` bash
-$ nodejs index.js
+$ nodejs cluster.js
 ```
 
 Ahora podemos abrir un navegador e intentar ingresar a la url donde está nuestro load balancer: `http://localhost:3000`.
-<<<<<<< HEAD
+
 
 ### Pruebas con apache bench
 Ejemplo de prueba
@@ -80,5 +92,4 @@ Ejemplo de prueba
 # usamos '-l' porque el contenido es dinámico y si no lo usamos ab interpreta el reqeust como fallido
 $ ab -n 1000 -c 100 -l http://localhost:3000/
 ```
-=======
->>>>>>> origin/master
+

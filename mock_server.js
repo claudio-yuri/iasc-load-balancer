@@ -18,7 +18,7 @@ var express = require('express');
 var app = express();
 
 app.all('/', function (req, res) {
-  console.log(`[${serverName}] - Recibí un request de tipo ${req.method} de ${req.ip}`);
+  console.debug(`[${serverName}] - Recibí un request de tipo ${req.method} de ${req.ip}`);
   setTimeout(function() {
     res.send(`Saludos desde ${serverName}, son las ${(new Date().toString())}`);
   }, delay);
@@ -27,7 +27,7 @@ app.all('/', function (req, res) {
 // Respuesta para el Heartbeat
 
 app.route('/heartbeat').get(function (req, res) {
-    console.log('me llego un heartbeat request - respondo ok');
+    console.debug('me llego un heartbeat request - respondo ok');
     res.json({status: 'ok'})
 });
 
@@ -35,7 +35,7 @@ app.listen(listenPort, function () {
   console.log(`[${serverName}] - Escuchando en ${listenPort}!`);
 }).on('error', function(err) {
     if (err.errno === 'EADDRINUSE')
-        console.log('Puerto ocupado');
+        console.debug('Puerto ocupado '+listenPort);
     else
-        console.log(err);
+        console.debug(err);
 });
