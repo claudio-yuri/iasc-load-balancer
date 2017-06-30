@@ -57,31 +57,18 @@ else{
     app.all("/", (req, res) => {
         console.info(`Recibí un request ${req.method} de ${req.ip}`);
         console.debug(req.url);
-        
-        if(canUseCache(req)){
-            //intento obtener los datos del caché
-            redis_client.get(getCacheKey(req), (err, reply) => {
-                // console.debug(err);
-                // console.debug(reply);
-                if(reply !== null){
-                    //cache hit! respondo al cliente
-                    res.send(reply);
-                }
-                else{
-                    //cahce miss. procedo a hacer el request al server destino
-                    makeRequest(srvMan, req, res, process, config.maxRetryCount,[]);
-                }
-            });
-        }
-        else{
+
+        getFromCache(req, res, ()=>{
+            //si no lo puede obtener de la cache
+
             //determino la cantidad de retries disponibles según el tipo de request
             var maxNumberOfRetries = config.maxRetryCount;
-            if(req.method === "POST" || req.method === "PUT" || req.method === "DELETE"){
+            if (req.method === "POST" || req.method === "PUT" || req.method === "DELETE")
                 maxNumberOfRetries = 0;
-            }
+
             //procedo a hacer el request
-            makeRequest(srvMan, req, res, process, maxNumberOfRetries,[]);
-        }
+            makeRequest(srvMan, req, res, process, maxNumberOfRetries);
+        });
     });
 
     //levanto el servidor
@@ -109,31 +96,40 @@ else{
     });
 
     config.requests.forEach(function (request) {
-
+        srvMan.addServers(request.servers, request.url);
         app.all(request.url, (req, res) => {
             console.log(`Recibí un request ${req.method} de ${req.ip}`);
             console.log(req.url);
 
-            if(canUseCache(req)){
-                //intento obtener los datos del caché
-                redis_client.get(getCacheKey(req), (err, reply) => {
-                    // console.debug(err);
-                    // console.debug(reply);
-                    if(reply !== null){
-                        //cache hit! respondo al cliente
-                        res.send(reply);
-                    }
-                    else{
-                        //cahce miss. procedo a hacer el request al server destino
-                        makeRequest(srvMan, req, res, process, request.servers.length-1, request.servers);
-                    }
-                });
-            }
-            else{
+            getFromCache(req, res, ()=>{
+                //si no lo puede obtener de la cache
+
+                //determino la cantidad de retries disponibles según el tipo de request
+                var maxNumberOfRetries = config.maxRetryCount;
+                if (req.method === "POST" || req.method === "PUT" || req.method === "DELETE")
+                    maxNumberOfRetries = 0;
+
                 //procedo a hacer el request
-                makeRequest(srvMan, req, res, process, request.servers.length-1,request.servers);
-            }
+                makeRequest(srvMan, req, res, process, maxNumberOfRetries);
+            });
         });
+    });
+}
+
+function getFromCache(req, res, callback) {
+
+    //si el request no puede usar cache
+    if(!canUseCache(req)) {
+        callback();        //ejecuto el callback
+        return;
+    }
+
+    //intento obtener los datos del caché
+    redis_client.get(getCacheKey(req), (err, reply) => {
+        if(reply !== null)
+            res.send(reply); //cache hit! respondo al cliente
+        else //cache miss. ejecuto el callback (hacer el request al server destino)
+            callback();
     });
 }
 
@@ -172,14 +168,11 @@ function getCacheKey(req){
  * @param {Process} process 
  * @param {number} retries la cantidad de reintentos disponibles
  */
-function makeRequest(srvMan, req, res, process, retries, serverList){
+function makeRequest(srvMan, req, res, process, retries){
     var client = new Client();
     var theHost;
     //le pido un servidor al manager
-    if(serverList.length != 0)
-        theHost = srvMan.getServerFrom(serverList);
-    else
-        theHost = srvMan.getServer();
+    theHost = srvMan.getServer(req.url);
 
     console.info(`[${process.pid}] Se va a hacer un request al servidor ${theHost}`);
     
@@ -205,10 +198,8 @@ function makeRequest(srvMan, req, res, process, retries, serverList){
     //atiendo el evento de error del request al servidor destino
     r_req.on('error', (err) => {
         console.error(`[${process.pid}] request error`);
-        if(serverList.length != 0)
-            serverList = serverList.slice(1, serverList.length);
         //pregunto si el header ya se envío porque los eventos de error y requestTimeout se pueden lanzar en simultáneo
-        if(!res.headerSent) handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries,serverList);
+        if(!res.headerSent) handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries);
     });
 
     //atiendo el evento de timeout del request al servidor destino
@@ -228,7 +219,7 @@ function makeRequest(srvMan, req, res, process, retries, serverList){
  * @param {Process} process 
  * @param {number} retries la cantidad de reintentos disponibles
  */
-function handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries,serverList){
+function handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries){
     srvMan.setServerOffline(theHost);
     //le aviso al master que theHost no reponde para que le avise a los demás workers
     process.send({
@@ -238,7 +229,7 @@ function handleErrorFromRemoteServer(theHost, srvMan, req, res, process, retries
     });
     if(retries > 0){
         console.log(`[${process.pid}] remote server error. Remaining attemps ${--retries}`);
-        makeRequest(srvMan, req, res, process, (retries),serverList);
+        makeRequest(srvMan, req, res, process, (retries));
     }else{
         console.error(`[${process.pid}] can't process request`);
         res.sendStatus(503);

@@ -3,47 +3,50 @@
 class ServerManager{
     constructor(serverList, timeout){
         this._serverList = serverList;
+        this._serverAltList = {};
         this._serverStatus = {};
         for (var pos in serverList){
             this._serverStatus[serverList[pos]] = true;
         }
         this._offlineList = [];
         this._timeout = timeout;
-        this._nextPos = 0;
+        this._nextPos = -1;         //para que empiece en 0
+        this._nextPosAlt = -1;
     }
-    getNextPos(){
-        this._nextPos++;
-        if(this._nextPos >= this._serverList.length){
-            this._nextPos = 0;
+    getNext(pos, max){
+        pos++;        //round robin
+        if(pos >= max){
+            pos = 0;
         }
-        return this._nextPos;
+        return pos;
     }
-    getServer(){
-        var max = this._serverList.length;
-        var cont = 0;
-        var result = null;
+    getServer(url){
+        var serverList, cont = 0, result = null, max, pos;
+
+        //si hay una lista de servers para el request de url
+        if (this._serverAltList[url] != null){
+            serverList = this._serverAltList[url];
+            pos = this._nextPosAlt;
+        }
+        else{
+            serverList = this._serverList;
+            pos = this._nextPos;
+        }
+
+        max = serverList.length;
+
         while (cont < max){
-            var pos = this.getNextPos();
-            if(this.isServerOnline(this._serverList[pos])){
-                result = this._serverList[pos];
+            pos = this.getNext(pos, max);
+            if(this.isServerOnline(serverList[pos])){
+                result = serverList[pos];
                 break;
             }
             cont++;
         }
         return result;
     }
-    getServerFrom(serverList){
-        var max = serverList.length;
-        var pos = 0;   //si se quiere distribuir, hacer un random de 0 a max-1
-        var result = null;
-        while (pos < max){
-            if(this.isServerOnline(serverList[pos])){
-                result = serverList[pos];
-                break;
-            }
-            pos++;
-        }
-        return result;
+    addServers(serverList, url){
+        this._serverAltList[url] = serverList;
     }
     //devuelve true si el server está online
     isServerOnline(host) {
