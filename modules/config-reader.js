@@ -1,4 +1,6 @@
-//recibe la ruta del archivo de configuración
+/**
+ * recibe la ruta del archivo de configuración
+ */
 module.exports = function(configFileName){
     const fs = require('fs');
 

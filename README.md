@@ -21,7 +21,7 @@ La solución cuenta con un proceso master que levanta tantos procesos workers co
 ### Load Balancer
 Se corre con el comando 
 ```bash
-$ nodejs index.js # versión mono proceso
+$ nodejs index.js # versión mono proceso [obsoleto]
 $ nodejs cluster.js # versión multi proceso
 ```
 
@@ -55,12 +55,14 @@ Ahí vás a ver algo parecido a esto:
     "serverExclusionTime": 10, //tiempo en segundos que se va a exlcuir a un servidor de la lista
                                //luego de ese tiempo, se lo volverá a considerar para enviarle requests
     "maxRetryCount": 3, //cantidad de retries máximo por request
-    "debug": true, //define si muestra o no informaición en la consola
+    "debug": true, //define si muestra o no informaición en la consola. para mayor rendimiento se aconseja setear el valor en false
     "cacheTimeout": 10, //duración de la información en caché
     "serverList": [ //esta es la lista de servidores
         "http://localhost:3100",
         "http://localhost:3200",
-        "http://localhost:3300"        
+        "http://localhost:3300",
+        "http://localhost:3400",
+        "http://localhost:3500"
     ],
     "heartbeat":{
       "executionInterval":10
@@ -75,13 +77,13 @@ Ahí vás a ver algo parecido a esto:
                   "servers": ["http://localhost:3100"]
                 },
                 {
-                  "url": "*",
+                  "url": "/heavytask",
                   "servers": ["http://localhost:3500"]
                 }
     ]
 }
 ```
->observaciones: "url": "*" representa la opcion: en caso contario (default)
+>observaciones: solo los patrones marcados en `requests` se atienden de manera especial, el resto cae en round robin
 
 Luego, abrís varias consolas y vas levantando los mock server de la siguiente manera:
 
@@ -92,6 +94,10 @@ $ nodejs mock_server.js -p 3100
 $ nodejs mock_server.js -p 3200
 # consola 3
 $ nodejs mock_server.js -p 3300
+# consola 4
+$ nodejs mock_server.js -p 3400
+# consola 5
+$ nodejs mock_server.js -p 3500
 ```
 Finalmente, abrimos una consola más y levanamos el load balancer
 ``` bash
@@ -107,4 +113,3 @@ Ejemplo de prueba
 # usamos '-l' porque el contenido es dinámico y si no lo usamos ab interpreta el reqeust como fallido
 $ ab -n 1000 -c 100 -l http://localhost:3000/
 ```
-

@@ -49,12 +49,12 @@ if (cluster.isMaster) {
 }
 //cluster workers
 else{
-    const srvMan = new ServerManager(config.serverList, config.serverExclusionTime);
+    const srvMan = new ServerManager(config.serverList, config.serverExclusionTime, config.requests);
     var app = express();
     const numberOfRetries = 3;
 
     //todos los requests entrantes
-    app.all("/", (req, res) => {
+    app.all("*", (req, res) => {
         console.info(`Recibí un request ${req.method} de ${req.ip}`);
         console.debug(req.url);
 
@@ -94,28 +94,14 @@ else{
         new ServerSupervisor(srvMan, config);
         res.json({status: 'heartbeat ok'})
     });
-
-    config.requests.forEach(function (request) {
-        srvMan.addServers(request.servers, request.url);
-        app.all(request.url, (req, res) => {
-            console.log(`Recibí un request ${req.method} de ${req.ip}`);
-            console.log(req.url);
-
-            getFromCache(req, res, ()=>{
-                //si no lo puede obtener de la cache
-
-                //determino la cantidad de retries disponibles según el tipo de request
-                var maxNumberOfRetries = config.maxRetryCount;
-                if (req.method === "POST" || req.method === "PUT" || req.method === "DELETE")
-                    maxNumberOfRetries = 0;
-
-                //procedo a hacer el request
-                makeRequest(srvMan, req, res, process, maxNumberOfRetries);
-            });
-        });
-    });
 }
 
+/**
+ * Intenta obtener la información de caché en caso de ser necesario
+ * @param {Express.Request} req 
+ * @param {Express.Response} res 
+ * @param {function} callback La función a ser ejecutada en caso de un cache miss o cuando no se usa cache
+ */
 function getFromCache(req, res, callback) {
 
     //si el request no puede usar cache

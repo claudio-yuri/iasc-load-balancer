@@ -3,7 +3,7 @@
     "serverTimeout": 10,
     "serverExclusionTime": 100000,
     "maxRetryCount": 3,
-    "debug": false,
+    "debug": true,
     "cacheTimeout": 10,
     "serverList": [
         "http://localhost:3100",
@@ -25,7 +25,7 @@
                   "servers": ["http://localhost:3100"]
                 },
                 {
-                  "url": "*",
+                  "url": "/heavytask",
                   "servers": ["http://localhost:3500"]
                 }
     ]
